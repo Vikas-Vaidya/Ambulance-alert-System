@@ -74,12 +74,22 @@ WSGI_APPLICATION = 'AmbulanceAlertingSystem.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# settings.py
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',  # MySQL backend
+        'NAME': 'AmbulanceAlertingSystem',          # Database name
+        'USER': 'root',           # Database username
+        'PASSWORD': '',           # Database password
+        'HOST': 'localhost',                   # Database host, e.g., localhost
+        'PORT': '3306',                        # Database port, typically 3306
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  # Ensures strict SQL mode
+        }
     }
 }
+
 
 
 # Password validation
