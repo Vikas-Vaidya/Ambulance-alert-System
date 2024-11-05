@@ -29,6 +29,28 @@ def home(request):
         
     return render(request, 'index.html')
 
+def register(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        name = request.POST.get("name")
+        profession = request.POST.get("profession")
+        
+        try:
+            user, created = User.objects.get_or_create(email_id=email, password=password, name=name, profession=profession)
+            if user.profession == "hpt":
+                return redirect("hospital")
+            elif user.profession == "trp":
+                return redirect("traffic_police")
+            else:
+                return redirect("ambulance_drive")
+        except User.DoesNotExist:
+            return render(request, 'register.html', {'password': "False"})
+        
+    return render(request, 'register.html')
+
+
+
 def admin(request):
     if request.method == "POST":
         name = request.POST.get("name")
