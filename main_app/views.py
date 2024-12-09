@@ -1,7 +1,8 @@
 # main_app/views.py
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.contrib import messages
 from .models import User, TrafficSignal, Hospital
 import os
 from dotenv import load_dotenv
@@ -49,16 +50,14 @@ def register(request):
         
     return render(request, 'register.html')
 
-
-
-def admin(request):
+def admin_page(request):
     if request.method == "POST":
         name = request.POST.get("name")
         email = request.POST.get("Email")
-        profession = request.POST.get("profession")
+        profession = request.POST.get("proffession")  # Note the corrected field name
         password = request.POST.get("password")
 
-        User.objects.create(name=name, email_id=email, profession=profession, password=password)
+        user = User.objects.create(name=name, email_id=email, profession=profession, password=password)
 
         if profession == 'trp':
             location = request.POST.get("location")
@@ -66,9 +65,24 @@ def admin(request):
             from1, to1 = request.POST.get("from1"), request.POST.get("to1")
             from2, to2 = request.POST.get("from2"), request.POST.get("to2")
 
-            TrafficSignal.objects.create(from_location=from1, to_location=to1, location=location, name=name, s_s_status=True, discord_name=discord_name)
+            TrafficSignal.objects.create(
+                from_location=from1,
+                to_location=to1,
+                location=location,
+                name=name,
+                s_s_status=True,
+                discord_name=discord_name
+            )
+
             if from2 and to2:
-                TrafficSignal.objects.create(from_location=from2, to_location=to2, location=location, name=name, s_s_status=True, discord_name=discord_name)
+                TrafficSignal.objects.create(
+                    from_location=from2,
+                    to_location=to2,
+                    location=location,
+                    name=name,
+                    s_s_status=True,
+                    discord_name=discord_name
+                )
 
         elif profession == "hpt":
             hospital_name = request.POST.get("hospital")
@@ -76,11 +90,18 @@ def admin(request):
             discord_name_d = request.POST.get("d_name-d")
             hpt_location = request.POST.get("hospitallocation")
 
-            Hospital.objects.create(h_discord_name=discord_name_d, hospital_name=hospital_name, accept_patient=accept_patient, location=hpt_location)
+            Hospital.objects.create(
+                h_discord_name=discord_name_d,
+                hospital_name=hospital_name,
+                accept_patient=accept_patient,
+                location=hpt_location
+            )
 
-        return HttpResponse("<h1>Record added Successfully</h1>")
+        messages.success(request, f"Record for {name} added successfully!")
+        return redirect('admin-page')
 
     return render(request, 'Admin-Page.html')
+
 
 def hospital_view(request):
     hospitals = Hospital.objects.all()
@@ -115,16 +136,37 @@ def ambulance_drive(request):
         route_from = request.POST.get("ambulancedriver-from")
         route_to = request.POST.get("ambulancedriver-to")
         
-        signal_details = TrafficSignal.objects.filter(from_location=route_from, to_location=route_to)
+        #signal_details = TrafficSignal.objects.filter(from_location=route_from, to_location=route_to)
+        signal_details = TrafficSignal.objects.filter(to_location=route_to)
         hospital_details = Hospital.objects.filter(location=route_to)
         
-        text_hospital_name = ', '.join([h.hospital_name for h in hospital_details])
-        disc2.post(content=f"A patient is coming to {route_to}. Your hospital {text_hospital_name} covers this location, get ready with the bed")
+        # text_hospital_name = ', '.join([h.hospital_name for h in hospital_details])
+        # disc2.post(content=f"A patient is coming to {route_to}. Your hospital {text_hospital_name} covers this location, get ready with the bed")
+        disc2.post(content=f"A patient is coming to {route_to}, get ready with the bed")
 
         for signal in signal_details:
             status = "Free" if signal.s_s_status else "Busy"
-            disc.post(content=f"Ambulance is coming in {signal.location}, {signal.name}. free the road from {route_from} to {route_to}")
+            disc.post(content=f"Ambulance is coming to {signal.location}. {signal.name}, free the road to {route_to}")
+            #disc.post(content=f"Ambulance is coming in {signal.location}, {signal.name}. free the road from {route_from} to {route_to}")
 
         return render(request, 'Ambulance_driver_Page.html', {'signal_details': signal_details, 'fromlist': from_list, 'hospital_details': hospital_details})
 
     return render(request, 'Ambulance_driver_Page.html', {'fromlist': from_list})
+
+def get_hospital_by_name(request):
+    query = request.GET.get('name', '')
+    if query:
+        hospitals = Hospital.objects.filter(hospital_name__icontains=query).values(
+            'hospital_name', 'accept_patient', 'location'
+        )
+        return JsonResponse({'hospitals': list(hospitals)}, status=200)
+    return JsonResponse({'error': 'No hospital name provided'}, status=400)
+
+def get_signal_by_name(request):
+    query = request.GET.get('to_location', '')
+    if query:
+        signals = TrafficSignal.objects.filter(to_location__icontains=query).values(
+            'from_location', 's_s_status'
+        )
+        return JsonResponse({'signals': list(signals)}, status=200)
+    return JsonResponse({'error': 'No signal name provided'}, status=400)

@@ -1,66 +1,104 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <style>
-            body{
-                background-color:aquamarine;
-            }
-            .container{
-                display:flex;
-                flex-direction:column;
-                justify-content:center;
-                align-items:center;
-            }
-            .selection{
-                margin:50px;
-            }
-            .hospital_details{
-                margin:50px;
-            }
-            td,th{
-                border:1px solid blueviolet;
-                padding:10px 20px;
-            }
-            h1{
-                text-align:center;
-            }
-        </style>
-    </head>
-    <body>
-        <header>
-            <h1>Hospital Page</h1>
-        </header>
-        <div class="container">
-        <div class="selection">
-            <form action="/hospital/" method="POST">
-                {% csrf_token %}
-                <select name="hospital_name_hp" onchange="">
-                    {% for i in hospital_name_hp %}
-                    <option value="{{i.h_discord_name}}">{{i.h_discord_name}}</option>
-                    {%endfor%}
-                </select>
-                <select name="accept_patient">
-                    <option value=1>Yes</option>
-                    <option value=0>No</option>
-                </select>
-                <input type="submit"/>
-            </form>
-        </div>
-        {{record_updated}}
-        <div class="hospital-details">
-            <table>
-                <tr>
-                    <th>Hospital Name</th>
-                    <th>Accept Patient</th>
-                </tr>
-                {% for i in hospital_name_hp %}
-                <tr>
-                    <td>{{i.h_discord_name}}</td>
-                    <td>{{i.h_discord_name}}</td>
-                </tr>
-                {%endfor%}
-            </table>
-        </div>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hospital Page</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: aquamarine;
+      }
+
+      header {
+        background-color: #6c757d;
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logout-btn {
+        margin-right: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      td,
+      th {
+        padding: 10px 20px;
+      }
+
+      .form-container {
+        max-width: 600px;
+        margin: auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1 class="m-0">Hospital Page</h1>
+      <a href="http://127.0.0.1:8000/" class="btn btn-danger logout-btn"
+        >Logout</a
+      >
+    </header>
+    <div class="container py-5">
+      <!-- Form Section -->
+      <div class="form-container card shadow p-4 mb-5">
+        <h2 class="text-center mb-4">Update Hospital Details</h2>
+        <form
+          action="/hospital/"
+          method="POST"
+          class="d-flex flex-wrap gap-3 justify-content-center"
+        >
+          {% csrf_token %}
+          <select name="hospital_name_hp" class="form-select w-auto" required>
+            {% for i in hospital_name_hp %}
+            <option value="{{i.h_discord_name}}">{{i.h_discord_name}}</option>
+            {% endfor %}
+          </select>
+          <select name="accept_patient" class="form-select w-auto" required>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+      </div>
+
+      <!-- Message Section -->
+      <div class="text-center mb-4">{{record_updated}}</div>
+
+      <!-- Table Section -->
+      <div class="card shadow p-4">
+        <h2 class="text-center mb-4">Hospital Details</h2>
+        <table class="table table-bordered table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>Hospital Name</th>
+              <th>Accept Patient</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in hospital_name_hp %}
+            <tr>
+              <td>{{i.h_discord_name}}</td>
+              <td>{{i.accept_patient}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    </body>
+    <!-- Bootstrap JS (Optional for interactive features) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 </html>

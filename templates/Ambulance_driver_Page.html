@@ -1,261 +1,341 @@
-<html>
-  <head>
-    <title>MapmyIndia Plugin - direction Plugin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="desciption" content="Mapmyindia Direction Plugin" />
+<!DOCTYPE html>
+<html lang="en">
 
-    <script src="https://apis.mapmyindia.com/advancedmaps/v1/38b95f70-a442-422f-adf0-0bb5d92a6e90/map_load?v=1.5"></script>
-    <script src="https://apis.mapmyindia.com/advancedmaps/api/38b95f70-a442-422f-adf0-0bb5d92a6e90/map_sdk_plugins"></script>
-    <!-- 
-        <script
-        src="https://apis.mapmyindia.com/advancedmaps/v1/0b187d2c-e38a-4420-add2-feed3a09974c/map_load?v=1.5"></script>
-    <script
-        src="https://apis.mapmyindia.com/advancedmaps/api/0b187d2c-e38a-4420-add2-feed3a09974c/map_sdk_plugins"></script>
-        -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambulance Driver Page</title>
+  <meta name="description" content="MapmyIndia Direction Plugin" />
 
-    <style>
-      body {
-        background-color: rgb(167, 232, 211);
-      }
-      .body {
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 20px;
-      }
+  <!-- Leaflet.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-      #map {
-        width: 500px;
-        height: 500px;
-        margin: 0;
-        padding: 0;
-        background-color: red;
-        box-shadow: 1px 1px 10px 1px black;
-      }
+  <!-- OpenRouteService API for routing -->
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
 
-      #nearby_search {
-        width: 500px !important;
-        background-color: green;
-        align-self: center;
-        margin-right: 30px !important;
-        box-shadow: 1px 1px 10px 1px black;
-      }
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: rgb(167, 232, 211);
+    }
 
-      h1 {
-        margin: 10px;
-        padding: 0;
-      }
+    #map {
+      width: 100%;
+      height: 500px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+    }
 
-      .headerr p {
-        text-align: center;
-      }
-      .from-to-form {
-        display: block;
-        width: 300px;
-        padding: 20px;
-        margin: auto;
-        background-color: rgb(209, 175, 241);
-        border-radius: 10px;
-        box-shadow: 1px 1px 10px 1px black;
-      }
-      .from-to-form p {
-        width: max-content !important;
-        font-size: 20px;
-      }
-      .from-to-form select {
-        width: 200px;
-        padding: 8px;
-        font-size: 18px;
-        border-radius: 10px;
-        background-color: bisque;
-        border: none;
-      }
-      .from-to-form input {
-        width: 100px;
-        padding: 8px;
-        margin: auto;
-        margin-top: 20px;
-        display: block;
-        border-radius: 10px;
-        border: none;
-        background-color: blueviolet;
-        color: white;
-      }
-      td,
-      th {
-        border: 1px solid blueviolet;
-        padding: 10px 20px;
-        margin: 0;
-      }
-      .result-section {
-        display: flex;
-        flex-direction: column;
-        width: max-content;
-        margin: auto;
-      }
-      .result-section p {
-        text-align: center;
-        font-size: 20px;
-        font-weight: bolder;
-        margin: 0;
-        margin-top: 40px;
-      }
-      .map-map {
-        display: flex;
-        flex-direction: row;
-      }
-      @media screen and (max-width: 1000px) {
-        .map-map {
-          flex-direction: column;
-        }
-        #nearby_search {
-          margin: 0 0 50px 0 !important;
-        }
-      }
-    </style>
-  </head>
+    .result-section table {
+      width: 100%;
+    }
+  </style>
+</head>
 
-  <body>
-    <div class="body">
-      <div class="headerr">
-        <h1>Ambulance Driver Page</h1>
-        <p>from Ambulance alerting system</p>
-      </div>
-      <div class="map-map">
-        <div
-          id="nearby_search"
-          style="
-            margin: 5px;
-            width: 99%;
-            height: 250px;
-            overflow-y: auto;
-            border-radius: 10px;
-          "
-        ></div>
-        <div id="map"></div>
-        <div id="direction"></div>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Ambulance Driver Page</a>
+      <div class="d-flex">
+        <a href="http://127.0.0.1:8000/" class="btn btn-danger">Logout</a>
       </div>
     </div>
-    <br />
-    <br />
-    <div class="from-to-form">
+  </nav>
+
+  <div class="container py-4">
+    <!-- Header Section -->
+    <div class="text-center mb-4">
+      <p class="text-muted">From Ambulance Alerting System</p>
+    </div>
+
+    <!-- Map and Nearby Search Section -->
+    <!-- <div class="row mb-4">
+      <div class="col-md-6">
+        <div id="map"></div>
+      </div>
+    </div> -->
+
+    <div class="row">
+      <div class="col-md-8">
+        <div id="map"></div>
+      </div>
+      <div class="col-md-4">
+        <div id="hospital-list" class="list-group" style="height: 500px; overflow-y: auto"></div>
+      </div>
+    </div>
+
+    <!-- From-To Form Section -->
+    <div class="card shadow p-4 mb-5">
+      <h4 class="text-center mb-4">Select Your Route</h4>
       <form action="/ambulance-drive/" method="POST">
         {% csrf_token %}
-        <label>
-          <p>From:</p>
-          <select name="ambulancedriver-from">
-            {% for j in fromlist %}
-            <option value="{{j.from_location}}">{{j.from_location}}</option>
-            {% endfor %}
+        <div class="mb-3">
+          <label for="from-location" class="form-label">From:</label>
+          <select name="ambulancedriver-from" id="from-location" class="form-select" disabled></select>
+        </div>
+        <div class="mb-3">
+          <label for="to-location" class="form-label">To:</label>
+          <select name="ambulancedriver-to" id="to-location" class="form-select"></select>
+        </div>
+        <div class="text-center">
+          <button type="submit" name="routesubmit" class="btn btn-primary">
+            Submit
+          </button>
+        </div>
+
+        <!-- <div class="mb-3">
+          <label for="from-location" class="form-label">From:</label>
+          <input type="text" id="from-location" name="ambulancedriver-from" class="form-control" readonly />
+        </div>
+        <div class="mb-3">
+          <label for="to-location" class="form-label">To:</label>
+          <select id="to-location" name="ambulancedriver-to" class="form-select">
+            <option value="" disabled selected>Select a hospital</option>
           </select>
-          <label>
-            <p>To:</p>
-            <select name="ambulancedriver-to">
-              {% for j in fromlist %}
-              <option value="{{j.to_location}}">{{j.to_location}}</option>
-              {% endfor %}
-            </select>
-          </label>
-        </label>
-        <br />
-        <input type="submit" name="routesubmit" />
+        </div> --
       </form>
     </div>
 
-    <div class="result-section">
-      <!--<p><span>&#x2713;</span> The message has been sent to Hospital</p>
-        <p><span>&#x2713;</span> The message is sent to traffic police: <b>{{tp_name}}</b>, at <b>{{tp_location}}</b></p>
-        <p><span>&#x2713;</span> Currently the signal is <b class="signal-stat">{{s_status}}</b></p>
-        <p>For more details refresh the page.</p>-->
-      <p>Signals in between your destination</p>
-      <table>
-        <tr>
-          <th>Location</th>
-          <th>Signal Status</th>
-          <th>Traffic Police name</th>
-          <th>Message sent to clear traffic</th>
-        </tr>
-        {% for i in signal_details %}
-        <tr>
-          <td>{{i.from_location}}</td>
-          <td>{{i.location}}</td>
-          <td>{{i.to_location}}</td>
-          <td>Yes</td>
-        </tr>
-        {% endfor %}
-      </table>
-      <p>Hospitals near your destination location</p>
-      <table>
-        <tr>
-          <th>Hospital Name</th>
-          <th>Bed available</th>
-        </tr>
-        {% for i in hospital_details %}
-        <tr>
-          <td>{{i.from_location}}</td>
-          <td>{{i.to_location}}</td>
-        </tr>
-        {% endfor %}
-      </table>
+    <!-- Result Section -->
+        <div class="result-section">
+          <h5 class="text-center">Signals in Between Your Destination</h5>
+          <table class="table table-striped table-bordered mt-3">
+            <thead class="table-dark">
+              <tr>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="signal-details-body">
+              <!-- Instructions will be inserted here dynamically -->
+            </tbody>
+          </table>
+
+          <h5 class="text-center mt-5">Hospitals Near Your Destination</h5>
+          <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+              <tr>
+                <th>Hospital Name</th>
+                <th>Accepting Patients</th>
+              </tr>
+            </thead>
+            <tbody class="hospital-selection">
+              <!-- Rows will be dynamically generated here -->
+            </tbody>
+          </table>
+
+        </div>
     </div>
 
     <script>
-      //Getting Geolocation using
-      var lat = 12.5437738,
-        log = 78.3299922;
-      var destination = "Dhandavamoorthi Hospital";
-      navigator.geolocation.getCurrentPosition(showPosition);
+      document.addEventListener("DOMContentLoaded", function () {
+        var map = L.map("map").setView([12.5437738, 78.3299922], 13);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+        }).addTo(map);
 
-      function showPosition(position) {
-        lat = position.coords.latitude;
-        log = position.coords.longitude;
-        console.log(lat);
-        console.log(log);
-      }
+        var hospitalsLayer = L.layerGroup().addTo(map);
+        var routingControl;
 
-      /*Map Initialization*/
-      var map = new MapmyIndia.Map("map", {
-        center: [lat, log],
-        zoom: 10,
-        search: false,
+        function fetchHospitals(lat, lng) {
+          var overpassUrl =
+            "https://overpass-api.de/api/interpreter?data=[out:json];node[amenity=hospital](around:10000," +
+            lat +
+            "," +
+            lng +
+            ");out;";
+          fetch(overpassUrl)
+            .then((response) => response.json())
+            .then((data) => {
+              hospitalsLayer.clearLayers();
+              var hospitalList = document.getElementById("hospital-list");
+              var hospitalDropdown = document.getElementById("to-location");
+              hospitalList.innerHTML = "";
+              hospitalDropdown.innerHTML = "";
+
+              data.elements.forEach((hospital, index) => {
+                if (hospital.lat && hospital.lon && hospital.tags.name) {
+                  var marker = L.marker([hospital.lat, hospital.lon]).addTo(
+                    hospitalsLayer
+                  );
+                  marker.bindPopup(hospital.tags.name).openPopup();
+
+                  var listItem = document.createElement("button");
+                  listItem.className = "list-group-item list-group-item-action";
+                  listItem.innerText = hospital.tags.name;
+                  listItem.onclick = function () {
+                    calculateRoute(lat, lng, hospital.lat, hospital.lon);
+                  };
+                  hospitalList.appendChild(listItem);
+
+                  var option = document.createElement("option");
+                  option.value = hospital.tags.name;
+                  option.text = hospital.tags.name;
+                  hospitalDropdown.appendChild(option);
+
+                  if (index === 0) {
+                    calculateRoute(lat, lng, hospital.lat, hospital.lon);
+                  }
+                }
+              });
+            })
+            .catch((error) =>
+              console.error("Error fetching hospitals:", error)
+            );
+
+          const hospitalDropdown = document.getElementById("to-location");
+          hospitalDropdown.addEventListener("change", function () {
+            const selectedHospital = hospitalDropdown.value;
+            if (selectedHospital) {
+              searchHospitalByName(selectedHospital);
+              searchSignalByName(hospitalDropdown);
+
+            }
+          });
+
+          function searchHospitalByName(hospitalName) {
+            fetch(`/api/hospital/?name=${encodeURIComponent(hospitalName)}`)
+              .then(response => response.json())
+              .then(data => {
+                const tableBody = document.querySelector('.hospital-selection');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                if (data.hospitals && data.hospitals.length > 0) {
+                  data.hospitals.forEach(hospital => {
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    const bedAvailabilityCell = document.createElement('td');
+
+                    nameCell.textContent = hospital.hospital_name;
+                    bedAvailabilityCell.textContent = hospital.accept_patient ? 'Yes' : 'No';
+
+                    row.appendChild(nameCell);
+                    row.appendChild(bedAvailabilityCell);
+                    tableBody.appendChild(row);
+                  });
+                } else {
+                  const row = document.createElement('tr');
+                  const cell = document.createElement('td');
+                  cell.textContent = 'No hospitals found';
+                  cell.colSpan = 2;
+                  row.appendChild(cell);
+                  tableBody.appendChild(row);
+                }
+              })
+              .catch(error => console.error('Error fetching hospital data:', error));
+          }
+        }
+
+
+        function searchSignalByName(signalName) {
+          fetch(`/api/signal/?to_location=${encodeURIComponent(signalName)}`)
+            .then(response => response.json())
+            .then(data => {
+              const tableBody = document.querySelector('.signal-details-body');
+              tableBody.innerHTML = ''; // Clear existing rows
+
+              if (data.hospitals && data.hospitals.length > 0) {
+                data.hospitals.forEach(signal => {
+                  const row = document.createElement('tr');
+                  const nameCell = document.createElement('td');
+                  const trafficStatus = document.createElement('td');
+
+                  nameCell.textContent = signal.from_location;
+                  trafficStatus.textContent = signal.s_s_status ? 'Free' : 'Busy';
+
+                  row.appendChild(nameCell);
+                  row.appendChild(bedAvailabilityCell);
+                  tableBody.appendChild(row);
+                });
+              } else {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.textContent = 'No signals found';
+                cell.colSpan = 2;
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+              }
+            })
+            .catch(error => console.error('Error fetching hospital data:', error));
+        }
+
+
+        function calculateRoute(lat1, lon1, lat2, lon2) {
+          if (routingControl) {
+            map.removeControl(routingControl);
+          }
+
+          var instructionsList = document.getElementById("signal-details-body");
+          instructionsList.innerHTML = ""; // Clear previous instructions
+
+          routingControl = L.Routing.control({
+            waypoints: [L.latLng(lat1, lon1), L.latLng(lat2, lon2)],
+            router: L.Routing.osrmv1({
+              serviceUrl:
+                "https://routing.openstreetmap.de/routed-car/route/v1/",
+            }),
+            createMarker: function () {
+              return null; // Prevent default markers from rendering on the map
+            },
+          })
+            .addTo(map);
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+              .then(response => response.json())
+              .then(data => {
+                var locationName = data.display_name || `${lat}, ${lon}`;
+
+                document.getElementById("from-location").innerHTML = `<option value="${locationName}" selected>${locationName}</option>`;
+              })
+              .catch(error => {
+                console.error("Error fetching location name:", error);
+                // Fallback in case of error
+                document.getElementById("from-location").innerHTML = `<option value="${lat}, ${lon}" selected>${lat}, ${lon}</option>`;
+              });
+
+
+            fetchHospitals(lat, lon);
+            map.setView([lat, lon], 13);
+
+            document
+              .getElementById("to-location")
+              .addEventListener("change", function () {
+                var selectedOption =
+                  document.getElementById("to-location").value;
+                if (selectedOption) {
+                  var selectedHospital = Array.from(
+                    hospitalsLayer.getLayers()
+                  ).find(
+                    (layer) => layer.getPopup().getContent() === selectedOption
+                  );
+                  if (selectedHospital) {
+                    calculateRoute(
+                      lat,
+                      lon,
+                      selectedHospital.getLatLng().lat,
+                      selectedHospital.getLatLng().lng
+                    );
+                  }
+                }
+              });
+          },
+          function (error) {
+            console.error("Geolocation error:", error);
+          }
+        );
       });
 
-      var options = {
-        divId: "nearby_search",
-        map: map,
-        keywords: "Hospital",
-        refLocation: [lat, log],
-        fitbounds: true,
-        click_callback: function (d) {
-          console.log(d);
-          update_direction(
-            d["placeName"].concat(", ", d["placeAddress"]),
-            d["eLoc"]
-          );
-        },
-      };
-      console.log(lat + "," + log);
-      var nr = MapmyIndia.nearby(options);
-      console.log(nr);
-      /*direction plugin initialization*/
-      function update_direction(addres, eloc) {
-        var direction_option = {
-          map: map,
-          start: lat + "," + log,
-          end: { label: addres, geoposition: eloc },
-          resource: "route_traffic",
-          callback: function (data) {
-            console.log(data);
-          },
-        };
-
-        console.log(lat + "," + log);
-        var direction_plugin = MapmyIndia.direction(direction_option);
-        //direction_plugin.remove();
-        console.log(dist + "<--");
-      }
     </script>
-  </body>
+</body>
+
 </html>
